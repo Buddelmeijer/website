@@ -1,6 +1,84 @@
-let gridArray = [['0','0','0','0'],['1','1','1','0'],['2','b','2','0'],['2','b','2','0']];
+let gridArray = [['l','l','l','l'],['l','l','l','l'],['l','l','l','l'],['l','l','l','l']];
 let game = 0;
+let first=true;
+let mines=2;
 function leftClicked(thingID){
+    if(first){
+        first=false;
+        let ex = Math.parseInt(thingID[0]);
+        let why = Math.parseInt(thingID[1]);
+        gridArray[ex][why]='c';
+        if(ex+1<4){
+            gridArray[ex+1][why]='c';
+            if(why+1<4){
+                gridArray[ex+1][why+1]='c';
+            }
+            if(why-1>=0){
+                gridArray[ex+1][why-1]='c';
+            }
+        }
+        if(why+1<4){
+            gridArray[ex][why+1]='c';
+            
+        }
+        if(thingID[0]-1>=0){
+            gridArray[thingID[0]-1][thingID[1]]='c';
+            if(thingID[1]+1<4){
+                gridArray[thingID[0]+1][thingID[1]+1]='c';
+            }
+            if(thingID[1]-1>=0){
+                gridArray[thingID[0]+1][thingID[1]-1]='c';
+            }
+        }
+        if(thingID[1]-1>=0){
+            gridArray[thingID[0]][thingID[1]-1]='c';
+        }
+        while(mines===2){
+            for(let x=0;x<4;x++){
+                for(let y=0;y<4;y++){
+                    if(gridArray[x][y]!=='c'&&Math.random()<.01&&mines>0){
+                        mines--;
+                        gridArray[x][y]='b';
+                    }
+                }
+            }
+        }
+        gridArray[thingID[0]][thingID[1]]='0';
+        for(let x=0;x<4;x++){
+            for(let y=0;y<4;y++){
+                let val=0;
+                if(gridArray[x][y]!=='b'){
+                    if(x+1<4&&gridArray[x+1][y]==='b'){
+                        val++;
+                    }
+                    if(x+1<4&&y+1<4&&gridArray[x+1][y+1]==='b'){
+                        val++;
+                    }
+                    if(x+1<4&&y-1>=0&&gridArray[x+1][y-1]==='b'){
+                        val++;
+                    }
+                    if(x-1>=0&&gridArray[x-1][y]==='b'){
+                        val++;
+                    }
+                    if(x-1>=0&&y+1<4&&gridArray[x-1][y+1]==='b'){
+                        val++;
+                    }
+                    if(x-1>=0&&y-1>0&&gridArray[x-1][y-1]==='b'){
+                        val++;
+                    }
+                    if(y+1<4&&gridArray[x][y+1]==='b'){
+                        val++;
+                    }
+                    if(y-1>=0&&gridArray[x][y-1]==='b'){
+                        val++;
+                    }
+                    let strval = val.toString();
+                    gridArray[x][y]=strval[0];
+                }
+            }
+        }
+
+    }
     if(gridArray[thingID[0]][thingID[1]]==='b'&&game===0&&document.getElementById(thingID).style.backgroundColor!=="orange"){
         document.getElementById(thingID).style.backgroundColor="red";
 
@@ -19,7 +97,7 @@ function leftClicked(thingID){
         for(let x=0;x<gridArray.length;x++){
             for(let y=0;y<gridArray[0].length;y++){
                 let string = x+""+y;
-                if(){
+                if(document.getElementById(string).style.backgroundColor!=="gray"&&gridArray[x][y]!=='b'){
                     game=0;
                 }
             }
