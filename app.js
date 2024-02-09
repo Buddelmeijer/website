@@ -5,8 +5,8 @@ let mines=2;
 function leftClicked(thingID){
     if(first){
         first=false;
-        let ex = Math.parseInt(thingID[0]);
-        let why = Math.parseInt(thingID[1]);
+        let ex = Number(thingID[0]);
+        let why = Number(thingID[1]);
         gridArray[ex][why]='c';
         if(ex+1<4){
             gridArray[ex+1][why]='c';
@@ -21,17 +21,17 @@ function leftClicked(thingID){
             gridArray[ex][why+1]='c';
             
         }
-        if(thingID[0]-1>=0){
-            gridArray[thingID[0]-1][thingID[1]]='c';
-            if(thingID[1]+1<4){
-                gridArray[thingID[0]+1][thingID[1]+1]='c';
+        if(ex-1>=0){
+            gridArray[ex-1][why]='c';
+            if(why+1<4){
+                gridArray[ex-1][why+1]='c';
             }
-            if(thingID[1]-1>=0){
-                gridArray[thingID[0]+1][thingID[1]-1]='c';
+            if(why-1>=0){
+                gridArray[ex-1][why-1]='c';
             }
         }
-        if(thingID[1]-1>=0){
-            gridArray[thingID[0]][thingID[1]-1]='c';
+        if(why-1>=0){
+            gridArray[ex][why-1]='c';
         }
         while(mines===2){
             for(let x=0;x<4;x++){
@@ -43,37 +43,37 @@ function leftClicked(thingID){
                 }
             }
         }
-        gridArray[thingID[0]][thingID[1]]='0';
+        gridArray[ex][why]='0';
         for(let x=0;x<4;x++){
             for(let y=0;y<4;y++){
                 let val=0;
                 if(gridArray[x][y]!=='b'){
                     if(x+1<4&&gridArray[x+1][y]==='b'){
-                        val++;
+                        val+=1;
                     }
                     if(x+1<4&&y+1<4&&gridArray[x+1][y+1]==='b'){
-                        val++;
+                        val+=1;
                     }
                     if(x+1<4&&y-1>=0&&gridArray[x+1][y-1]==='b'){
-                        val++;
+                        val+=1;
                     }
                     if(x-1>=0&&gridArray[x-1][y]==='b'){
-                        val++;
+                        val+=1;
                     }
                     if(x-1>=0&&y+1<4&&gridArray[x-1][y+1]==='b'){
-                        val++;
+                        val+=1;
                     }
-                    if(x-1>=0&&y-1>0&&gridArray[x-1][y-1]==='b'){
-                        val++;
+                    if(x-1>=0&&y-1>=0&&gridArray[x-1][y-1]==='b'){
+                        val+=1;
                     }
                     if(y+1<4&&gridArray[x][y+1]==='b'){
-                        val++;
+                        val+=1;
                     }
                     if(y-1>=0&&gridArray[x][y-1]==='b'){
-                        val++;
+                        val+=1;
                     }
                     let strval = val.toString();
-                    gridArray[x][y]=strval[0];
+                    gridArray[x][y]=strval.charAt(0);
                 }
             }
         }
@@ -87,7 +87,13 @@ function leftClicked(thingID){
         para.appendChild(node);
         const element = document.getElementById("winLose");
         element.appendChild(para);
+
+        let img = document.createElement("img");
+        img.src="https://media1.tenor.com/m/AibwCNEgGiAAAAAC/dog-puppy.gif"
+        let src = document.getElementById("gif");
+        src.appendChild(img);
         game=1;
+        
     }
     else if(game===0&&document.getElementById(thingID).style.backgroundColor!=="orange"){
         fill(thingID);
