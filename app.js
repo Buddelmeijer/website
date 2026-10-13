@@ -1,164 +1,134 @@
-let gridArray = [['l','l','l','l'],['l','l','l','l'],['l','l','l','l'],['l','l','l','l']];
-let game = 0;
-let first=true;
-let mines=2;
-function leftClicked(thingID){
-    if(first){
-        first=false;
-        let ex = Number(thingID[0]);
-        let why = Number(thingID[1]);
-        gridArray[ex][why]='c';
-        if(ex+1<4){
-            gridArray[ex+1][why]='c';
-            if(why+1<4){
-                gridArray[ex+1][why+1]='c';
-            }
-            if(why-1>=0){
-                gridArray[ex+1][why-1]='c';
-            }
-        }
-        if(why+1<4){
-            gridArray[ex][why+1]='c';
-            
-        }
-        if(ex-1>=0){
-            gridArray[ex-1][why]='c';
-            if(why+1<4){
-                gridArray[ex-1][why+1]='c';
-            }
-            if(why-1>=0){
-                gridArray[ex-1][why-1]='c';
+const SIZE = 4;
+const MINES = 2;
+
+let gridArray = Array.from({ length: SIZE }, () => Array(SIZE).fill('l'));
+let game = 0;      // 0 = playing, 1 = lost, 2 = won
+let first = true;
+
+function cellEl(r, c) {
+    return document.getElementById(r + "" + c);
+}
+function inBounds(r, c) {
+    return r >= 0 && r < SIZE && c >= 0 && c < SIZE;
+}
+function isFlagged(el) {
+    return el.style.backgroundColor === "orange";
+}
+function isRevealed(el) {
+    return el.style.backgroundColor === "gray";
+}
+
+// Place mines at random, never on or next to the first clicked cell,
+// then fill every other cell with its neighbour-mine count.
+function buildBoard(safeR, safeC) {
+    const candidates = [];
+    for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+            if (Math.abs(r - safeR) > 1 || Math.abs(c - safeC) > 1) {
+                candidates.push([r, c]);
             }
         }
-        if(why-1>=0){
-            gridArray[ex][why-1]='c';
-        }
-        while(mines===2){
-            for(let x=0;x<4;x++){
-                for(let y=0;y<4;y++){
-                    if(gridArray[x][y]!=='c'&&Math.random()<.01&&mines>0){
-                        mines--;
-                        gridArray[x][y]='b';
-                    }
+    }
+    // Fisher-Yates shuffle, then take the first MINES cells
+    for (let i = candidates.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+    }
+    for (let k = 0; k < Math.min(MINES, candidates.length); k++) {
+        const [r, c] = candidates[k];
+        gridArray[r][c] = 'b';
+    }
+
+    for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+            if (gridArray[r][c] === 'b') continue;
+            let count = 0;
+            for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                    if (dr === 0 && dc === 0) continue;
+                    const nr = r + dr, nc = c + dc;
+                    if (inBounds(nr, nc) && gridArray[nr][nc] === 'b') count++;
                 }
             }
+            gridArray[r][c] = String(count);
         }
-        gridArray[ex][why]='0';
-        for(let x=0;x<4;x++){
-            for(let y=0;y<4;y++){
-                let val=0;
-                if(gridArray[x][y]!=='b'){
-                    if(x+1<4&&gridArray[x+1][y]==='b'){
-                        val+=1;
-                    }
-                    if(x+1<4&&y+1<4&&gridArray[x+1][y+1]==='b'){
-                        val+=1;
-                    }
-                    if(x+1<4&&y-1>=0&&gridArray[x+1][y-1]==='b'){
-                        val+=1;
-                    }
-                    if(x-1>=0&&gridArray[x-1][y]==='b'){
-                        val+=1;
-                    }
-                    if(x-1>=0&&y+1<4&&gridArray[x-1][y+1]==='b'){
-                        val+=1;
-                    }
-                    if(x-1>=0&&y-1>=0&&gridArray[x-1][y-1]==='b'){
-                        val+=1;
-                    }
-                    if(y+1<4&&gridArray[x][y+1]==='b'){
-                        val+=1;
-                    }
-                    if(y-1>=0&&gridArray[x][y-1]==='b'){
-                        val+=1;
-                    }
-                    let strval = val.toString();
-                    gridArray[x][y]=strval.charAt(0);
-                }
-            }
-        }
-
-    }
-    if(gridArray[thingID[0]][thingID[1]]==='b'&&game===0&&document.getElementById(thingID).style.backgroundColor!=="orange"){
-        document.getElementById(thingID).style.backgroundColor="red";
-
-        const para = document.createElement("p");
-        const node = document.createTextNode("You lost the game");
-        para.appendChild(node);
-        const element = document.getElementById("winLose");
-        element.appendChild(para);
-
-        let img = document.createElement("img");
-        img.src="https://media1.tenor.com/m/AibwCNEgGiAAAAAC/dog-puppy.gif"
-        let src = document.getElementById("gif");
-        src.appendChild(img);
-        game=1;
-        
-    }
-    else if(game===0&&document.getElementById(thingID).style.backgroundColor!=="orange"){
-        fill(thingID);
-    }
-    if(game!==1){
-        game=2;
-        for(let x=0;x<gridArray.length;x++){
-            for(let y=0;y<gridArray[0].length;y++){
-                let string = x+""+y;
-                if(document.getElementById(string).style.backgroundColor!=="gray"&&gridArray[x][y]!=='b'){
-                    game=0;
-                }
-            }
-        }
-    }
-    if(game===2){
-        const bruh = document.createElement("p");
-        const bro = document.createTextNode("You won the game!");
-        bruh.appendChild(bro);
-        const cuh = document.getElementById("winLose");
-        cuh.appendChild(bro);
     }
 }
-function rightClicked(thingID){
-    if(document.getElementById(thingID).style.backgroundColor==="orange"&&game===0)
-        document.getElementById(thingID).style.backgroundColor="lightgreen";
-    else if(game===0&&document.getElementById(thingID).style.backgroundColor!=="gray"&&document.getElementById(thingID).style.backgroundColor!=="red"){
-        document.getElementById(thingID).style.backgroundColor="orange";
+
+// Reveal a cell; if it is a 0, flood-fill into all 8 neighbours.
+function reveal(r, c) {
+    if (!inBounds(r, c)) return;
+    const el = cellEl(r, c);
+    if (isRevealed(el) || isFlagged(el) || gridArray[r][c] === 'b') return;
+
+    el.style.backgroundColor = "gray";
+    el.innerHTML = gridArray[r][c];
+
+    if (gridArray[r][c] === '0') {
+        for (let dr = -1; dr <= 1; dr++) {
+            for (let dc = -1; dc <= 1; dc++) {
+                if (dr !== 0 || dc !== 0) reveal(r + dr, c + dc);
+            }
+        }
     }
 }
-function fill(thingID){
-    let ID = parseInt(thingID);
-    document.getElementById(thingID).style.backgroundColor="gray";
-    document.getElementById(thingID).innerHTML=gridArray[thingID[0]][thingID[1]];
 
-    if(gridArray[thingID[0]][thingID[1]]==='0'){
-        if(Math.floor(ID/10)<3&&gridArray[Math.floor(ID/10)+1][parseInt(thingID[1])]==='0'&&document.getElementById((Math.floor(ID/10)+1)+thingID[1]).style.backgroundColor!=="gray"){
-            fill((Math.floor(ID/10)+1)+thingID[1]);
-        }
-        else if(Math.floor(ID/10)<3&&gridArray[Math.floor(ID/10)+1][parseInt(thingID[1])]!=='b'&&document.getElementById((Math.floor(ID/10)+1)+thingID[1]).style.backgroundColor!=="gray"){
-            document.getElementById((Math.floor(ID/10)+1)+thingID[1]).style.backgroundColor="gray";
-            document.getElementById((Math.floor(ID/10)+1)+thingID[1]).innerHTML=gridArray[Math.floor(ID/10)+1][parseInt(thingID[1])];
-        }
+function fill(thingID) {
+    reveal(Number(thingID[0]), Number(thingID[1]));
+}
 
-        if(Math.floor(ID/10)>0&&gridArray[Math.floor(ID/10)-1][parseInt(thingID[1])]==='0'&&document.getElementById((Math.floor(ID/10)-1)+thingID[1]).style.backgroundColor!=="gray"){
-            fill((Math.floor(ID/10)-1)+thingID[1]);
-        }
-        else if(Math.floor(ID/10)>0&&gridArray[Math.floor(ID/10)-1][parseInt(thingID[1])]!=='b'&&document.getElementById((Math.floor(ID/10)-1)+thingID[1]).style.backgroundColor!=="gray"){
-            document.getElementById((Math.floor(ID/10)-1)+thingID[1]).style.backgroundColor="gray";
-            document.getElementById((Math.floor(ID/10)-1)+thingID[1]).innerHTML=gridArray[Math.floor(ID/10)-1][parseInt(thingID[1])];
-        }
+function showMessage(text) {
+    const para = document.createElement("p");
+    para.appendChild(document.createTextNode(text));
+    document.getElementById("winLose").appendChild(para);
+}
 
-        if((ID%10)<3&&gridArray[parseInt(thingID[0])][(ID%10)+1]==='0'&&document.getElementById(thingID[0]+(ID%10+1)).style.backgroundColor!=="gray"){
-            fill(thingID[0]+(ID%10+1));
+function checkWin() {
+    for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+            if (gridArray[r][c] !== 'b' && !isRevealed(cellEl(r, c))) return;
         }
-        else if((ID%10)<3&&gridArray[parseInt(thingID[0])][(ID%10)+1]!=='b'&&document.getElementById(thingID[0]+(ID%10+1)).style.backgroundColor!=="gray"){
-            document.getElementById(thingID[0]+(ID%10+1)).style.backgroundColor="gray";
-            document.getElementById(thingID[0]+(ID%10+1)).innerHTML=gridArray[parseInt(thingID[0])][(ID%10)+1];
-        }
+    }
+    game = 2;
+    showMessage("You won the game!");
+}
 
-        if((ID%10)>0&&gridArray[parseInt(thingID[0])][(ID%10)-1]==='0'&&document.getElementById(thingID[0]+(ID%10-1)).style.backgroundColor!=="gray"){
-            fill(thingID[0]+(ID%10-1));
-        }else if((ID%10)>0&&gridArray[parseInt(thingID[0])][(ID%10)-1]!=='b'&&document.getElementById(thingID[0]+(ID%10-1)).style.backgroundColor!=="gray"){
-            document.getElementById(thingID[0]+(ID%10-1)).style.backgroundColor="gray";
-            document.getElementById(thingID[0]+(ID%10-1)).innerHTML=gridArray[parseInt(thingID[0])][(ID%10)-1];
-        }
+function leftClicked(thingID) {
+    if (game !== 0) return;
+    const r = Number(thingID[0]);
+    const c = Number(thingID[1]);
+    const el = document.getElementById(thingID);
+
+    // Ignore clicks on flagged or already revealed cells
+    if (isFlagged(el) || isRevealed(el)) return;
+
+    if (first) {
+        first = false;
+        buildBoard(r, c);
+    }
+
+    if (gridArray[r][c] === 'b') {
+        el.style.backgroundColor = "red";
+        game = 1;
+        showMessage("You lost the game");
+
+        const img = document.createElement("img");
+        img.src = "https://media1.tenor.com/m/AibwCNEgGiAAAAAC/dog-puppy.gif";
+        document.getElementById("gif").appendChild(img);
+    } else {
+        reveal(r, c);
+        checkWin();
+    }
+}
+
+function rightClicked(thingID) {
+    if (game !== 0) return;
+    const el = document.getElementById(thingID);
+    if (isRevealed(el)) return;
+
+    if (isFlagged(el)) {
+        el.style.backgroundColor = "lightgreen";
+    } else {
+        el.style.backgroundColor = "orange";
     }
 }
