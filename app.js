@@ -1,5 +1,5 @@
-const SIZE = 4;
-const MINES = 2;
+const SIZE = 9;
+const MINES = 8;
 
 let gridArray = Array.from({ length: SIZE }, () => Array(SIZE).fill('l'));
 let game = 0;      // 0 = playing, 1 = lost, 2 = won
